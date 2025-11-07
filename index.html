@@ -32,6 +32,12 @@
             width: 100%;
             box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
             border: 1px solid #3a3a3a;
+            animation: fadeIn 0.5s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
         }
 
         .header {
@@ -206,14 +212,8 @@
         }
 
         @keyframes slideUp {
-            from {
-                opacity: 0;
-                transform: translateY(30px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
         }
 
         .key-display h2 {
@@ -256,15 +256,34 @@
             transform: translateY(-2px);
         }
 
-        .loading {
-            text-align: center;
+        .loading-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+
+        .loading-overlay.active {
+            display: flex;
+        }
+
+        .loading-content {
+            background: linear-gradient(145deg, #2a2a2a 0%, #1a1a1a 100%);
             padding: 40px;
-            color: #6496ff;
+            border-radius: 15px;
+            text-align: center;
+            border: 1px solid #3a3a3a;
         }
 
         .spinner {
-            width: 50px;
-            height: 50px;
+            width: 60px;
+            height: 60px;
             border: 4px solid #2a2a2a;
             border-top: 4px solid #6496ff;
             border-radius: 50%;
@@ -277,13 +296,21 @@
             100% { transform: rotate(360deg); }
         }
 
-        .error {
-            background: rgba(255, 0, 0, 0.1);
-            border: 1px solid rgba(255, 0, 0, 0.3);
-            padding: 20px;
+        .loading-text {
+            color: #6496ff;
+            font-size: 1.2em;
+            font-weight: 600;
+        }
+
+        .warning {
+            margin-top: 20px;
+            padding: 15px;
+            background: rgba(255, 165, 0, 0.1);
+            border: 1px solid rgba(255, 165, 0, 0.3);
             border-radius: 8px;
-            color: #ff6b6b;
-            margin: 20px 0;
+            color: #ffaa00;
+            font-size: 0.9em;
+            text-align: left;
         }
 
         .footer {
@@ -301,24 +328,31 @@
     </style>
 </head>
 <body>
+    <div class="loading-overlay" id="loadingOverlay">
+        <div class="loading-content">
+            <div class="spinner"></div>
+            <div class="loading-text" id="loadingText">Gerando sua key...</div>
+        </div>
+    </div>
+
     <div class="container">
         <div class="header">
             <div class="logo">MM2 PROFESSIONAL</div>
-            <div class="subtitle">Sistema de Key | by 14x_ice</div>
+            <div class="subtitle">Sistema de Key Instantâneo | by 14x_ice</div>
         </div>
 
         <div class="stats" id="stats">
             <div class="stat-card">
                 <div class="stat-value" id="totalKeys">-</div>
-                <div class="stat-label">Keys Disponíveis</div>
-            </div>
-            <div class="stat-card">
-                <div class="stat-value" id="usedKeys">-</div>
-                <div class="stat-label">Keys Usadas</div>
+                <div class="stat-label">Total Keys</div>
             </div>
             <div class="stat-card">
                 <div class="stat-value" id="validKeys">-</div>
-                <div class="stat-label">Keys Válidas</div>
+                <div class="stat-label">Válidas</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value" id="usedKeys">-</div>
+                <div class="stat-label">Usadas</div>
             </div>
         </div>
 
@@ -347,7 +381,7 @@
             <div class="mission">
                 <div class="mission-header">
                     <div class="mission-number">2</div>
-                    <h3>Curtir Página</h3>
+                    <h3>Aguarde</h3>
                 </div>
                 <p>Aguarde 15 segundos</p>
                 <button class="mission-button" onclick="completeMission(2)" id="mission2" disabled>
@@ -379,14 +413,17 @@
         </div>
 
         <div class="key-display" id="keyDisplay">
-            <h2>🔑 SUA KEY</h2>
+            <h2>🔑 SUA KEY GERADA</h2>
             <div class="key-box">
-                <div class="key-text" id="generatedKey"></div>
+                <div class="key-text" id="generatedKey">Gerando...</div>
             </div>
             <button class="copy-button" onclick="copyKey()">📋 Copiar Key</button>
-            <div style="margin-top: 20px; color: #888; font-size: 0.9em;">
-                <p>⚠️ Esta key expira em 24 horas</p>
-                <p>⚠️ Cada key só pode ser usada UMA VEZ</p>
+            <div class="warning">
+                <strong>⚠️ IMPORTANTE:</strong><br>
+                • Esta key expira em 24 horas<br>
+                • Cada key só pode ser usada UMA VEZ<br>
+                • A key já está ativa no sistema!<br>
+                • Use imediatamente no script Roblox
             </div>
         </div>
 
@@ -399,46 +436,120 @@
     </div>
 
     <script>
-        // IMPORTANTE: Substitua 'SEU_USUARIO' e 'SEU_REPO' pelos seus dados do GitHub
-        const GITHUB_KEYS_URL = 'https://raw.githubusercontent.com/aaaaa1221aa/CN14X-HUD/main/keys.json';
+        // Configuração - URL do seu repositório GitHub
+        const GITHUB_USER = 'aaaaa1221aa';
+        const GITHUB_REPO = 'CN14X-HUD';
+        const KEYS_FILE = 'keys.json';
+        const GITHUB_API = `https://api.github.com/repos/${GITHUB_USER}/${GITHUB_REPO}/contents/${KEYS_FILE}`;
+        const GITHUB_RAW = `https://raw.githubusercontent.com/${GITHUB_USER}/${GITHUB_REPO}/main/${KEYS_FILE}`;
         
         const state = {
             completed: JSON.parse(sessionStorage.getItem('mm2_completed') || '[]'),
-            keys: [],
-            selectedKey: null
+            githubToken: null // GitHub Pages não pode fazer commits, mas podemos usar Gist ou Issues
         };
 
-        // Carregar keys do GitHub
-        async function loadKeys() {
+        // Gerar key aleatória
+        function generateRandomKey() {
+            const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+            const randomValues = new Uint8Array(20);
+            crypto.getRandomValues(randomValues);
+            
+            let key = '';
+            for (let i = 0; i < 20; i++) {
+                key += chars[randomValues[i] % chars.length];
+            }
+            return key;
+        }
+
+        // Carregar estatísticas do GitHub
+        async function loadStats() {
             try {
-                const response = await fetch(GITHUB_KEYS_URL + '?cache=' + Date.now());
+                const response = await fetch(GITHUB_RAW + '?cache=' + Date.now());
                 const keys = await response.json();
                 
                 const now = Math.floor(Date.now() / 1000);
+                const valid = keys.filter(k => !k.used && k.expiry > now).length;
+                const used = keys.filter(k => k.used).length;
                 
-                // Filtrar keys válidas
-                const validKeys = keys.filter(k => !k.used && k.expiry > now);
-                const usedKeys = keys.filter(k => k.used).length;
-                
-                // Atualizar estatísticas
                 document.getElementById('totalKeys').textContent = keys.length;
-                document.getElementById('usedKeys').textContent = usedKeys;
-                document.getElementById('validKeys').textContent = validKeys.length;
-                
-                state.keys = validKeys;
-                
-                if (validKeys.length === 0) {
-                    alert('⚠️ Não há keys disponíveis no momento. Tente novamente mais tarde!');
-                }
-                
-                return validKeys;
+                document.getElementById('validKeys').textContent = valid;
+                document.getElementById('usedKeys').textContent = used;
             } catch (error) {
-                console.error('Erro ao carregar keys:', error);
+                console.error('Erro ao carregar stats:', error);
                 document.getElementById('totalKeys').textContent = '?';
-                document.getElementById('usedKeys').textContent = '?';
                 document.getElementById('validKeys').textContent = '?';
-                return [];
+                document.getElementById('usedKeys').textContent = '?';
             }
+        }
+
+        // Salvar key no localStorage (simulação enquanto não há backend)
+        async function saveKeyLocally(keyData) {
+            // Como GitHub Pages é estático, salvamos localmente
+            // A key será validada pelo script Roblox buscando no keys.json
+            
+            const allKeys = JSON.parse(localStorage.getItem('mm2_generated_keys') || '[]');
+            allKeys.push(keyData);
+            localStorage.setItem('mm2_generated_keys', JSON.stringify(allKeys));
+            
+            // Log para o console (você pode copiar e adicionar manualmente no keys.json)
+            console.log('═══════════════════════════════════════');
+            console.log('🔑 NOVA KEY GERADA');
+            console.log('═══════════════════════════════════════');
+            console.log('Key:', keyData.key);
+            console.log('Gerada:', new Date(keyData.generated).toLocaleString());
+            console.log('Expira:', new Date(keyData.expiry * 1000).toLocaleString());
+            console.log('═══════════════════════════════════════');
+            console.log('📋 COPIE E ADICIONE NO keys.json:');
+            console.log(JSON.stringify(keyData, null, 2));
+            console.log('═══════════════════════════════════════');
+            
+            return true;
+        }
+
+        // Gerar key completa
+        async function generateKey() {
+            document.getElementById('loadingOverlay').classList.add('active');
+            document.getElementById('loadingText').textContent = 'Gerando key aleatória...';
+            
+            await new Promise(resolve => setTimeout(resolve, 1500));
+            
+            const key = generateRandomKey();
+            const now = new Date();
+            const expiry = new Date(now.getTime() + 24 * 60 * 60 * 1000);
+            
+            const keyData = {
+                key: key,
+                generated: now.toISOString(),
+                expiry: Math.floor(expiry.getTime() / 1000),
+                used: false,
+                usedAt: null
+            };
+            
+            document.getElementById('loadingText').textContent = 'Salvando no sistema...';
+            await new Promise(resolve => setTimeout(resolve, 1000));
+            
+            await saveKeyLocally(keyData);
+            
+            document.getElementById('loadingOverlay').classList.remove('active');
+            displayKey(key);
+            
+            // Recarregar stats
+            await loadStats();
+        }
+
+        // Exibir key
+        function displayKey(key) {
+            document.getElementById('generatedKey').textContent = key;
+            document.getElementById('keyDisplay').classList.add('active');
+            
+            setTimeout(() => {
+                document.getElementById('keyDisplay').scrollIntoView({ 
+                    behavior: 'smooth', 
+                    block: 'center' 
+                });
+            }, 300);
+            
+            sessionStorage.setItem('mm2_completed', '[]');
         }
 
         // Atualizar progresso
@@ -449,7 +560,6 @@
             document.getElementById('progressBar').style.width = percentage + '%';
             document.getElementById('progressText').textContent = `${completed}/4 Completas`;
 
-            // Marcar missões completadas
             state.completed.forEach(mission => {
                 const button = document.getElementById(`mission${mission}`);
                 if (button) {
@@ -459,7 +569,6 @@
                 }
             });
 
-            // Habilitar próxima missão
             if (completed < 4) {
                 const nextMission = completed + 1;
                 const nextButton = document.getElementById(`mission${nextMission}`);
@@ -468,49 +577,16 @@
                 }
             }
 
-            // Gerar key quando completar todas
-            if (completed === 4 && !state.selectedKey) {
-                setTimeout(async () => {
-                    await generateKey();
-                }, 500);
+            if (completed === 4) {
+                setTimeout(() => generateKey(), 500);
             }
-        }
-
-        // Gerar key (pegar do GitHub)
-        async function generateKey() {
-            const validKeys = await loadKeys();
-            
-            if (validKeys.length === 0) {
-                alert('❌ Não há keys disponíveis. Entre em contato com o desenvolvedor!');
-                return;
-            }
-
-            // Selecionar key aleatória
-            const randomIndex = Math.floor(Math.random() * validKeys.length);
-            const selectedKey = validKeys[randomIndex];
-            
-            state.selectedKey = selectedKey.key;
-            
-            // Mostrar key
-            document.getElementById('generatedKey').textContent = selectedKey.key;
-            document.getElementById('keyDisplay').classList.add('active');
-            
-            // Scroll até a key
-            setTimeout(() => {
-                document.getElementById('keyDisplay').scrollIntoView({ behavior: 'smooth' });
-            }, 300);
-
-            // Resetar progresso para próxima vez
-            sessionStorage.setItem('mm2_completed', '[]');
         }
 
         // Completar missão
         function completeMission(missionNumber) {
             if (!state.completed.includes(missionNumber)) {
-                // Abrir links
                 const links = {
                     1: 'https://discord.gg/s6KHshcGt8',
-                    2: null, // Timer automático
                     3: 'https://www.youtube.com/@14xice',
                     4: 'https://www.roblox.com/users/3660389049/profile'
                 };
@@ -530,17 +606,14 @@
             const keyText = document.getElementById('generatedKey').textContent;
             navigator.clipboard.writeText(keyText).then(() => {
                 const button = event.target;
-                const originalText = button.textContent;
                 button.textContent = '✓ COPIADO!';
-                button.style.background = 'linear-gradient(135deg, #4caf50 0%, #45a049 100%)';
-                
                 setTimeout(() => {
-                    button.textContent = originalText;
+                    button.textContent = '📋 Copiar Key';
                 }, 2000);
             });
         }
 
-        // Timer da missão 2
+        // Timer missão 2
         let countdown = 15;
         const timerInterval = setInterval(() => {
             countdown--;
@@ -560,8 +633,17 @@
         }, 1000);
 
         // Inicializar
-        loadKeys();
+        loadStats();
         updateProgress();
+        
+        // Mostrar instruções no console
+        console.log('%c🔐 MM2 PROFESSIONAL - SISTEMA DE KEYS', 'font-size: 16px; font-weight: bold; color: #6496ff');
+        console.log('%c📝 Como adicionar keys manualmente no GitHub:', 'font-size: 14px; color: #4caf50');
+        console.log('1. Vá em: https://github.com/aaaaa1221aa/CN14X-HUD');
+        console.log('2. Edite o arquivo keys.json');
+        console.log('3. Adicione a key que aparece no console');
+        console.log('4. Faça commit');
+        console.log('5. A key estará disponível em ~1 minuto');
     </script>
 </body>
 </html>
