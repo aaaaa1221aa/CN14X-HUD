@@ -1,0 +1,68 @@
+# .github/workflows/generate-keys.yml
+name: Generate Keys Automatically
+
+on:
+  workflow_dispatch:  # Permite executar manualmente
+  schedule:
+    - cron: '0 */6 * * *'  # Roda a cada 6 horas
+
+jobs:
+  generate-keys:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+      
+      - name: Setup Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.10'
+      
+      - name: Generate Keys
+        run: |
+          python3 << 'EOF'
+          import json
+          import random
+          import string
+          from datetime import datetime, timedelta
+          
+          def generate_key():
+              chars = string.ascii_uppercase + string.digits
+              return ''.join(random.choices(chars, k=20))
+          
+          # Carregar keys existentes
+          try:
+              with open('keys.json', 'r') as f:
+                  keys = json.load(f)
+          except:
+              keys = []
+          
+          # Remover keys expiradas e usadas
+          now = int(datetime.now().timestamp())
+          keys = [k for k in keys if (k['expiry'] > now and not k['used'])]
+          
+          # Gerar 10 novas keys
+          for _ in range(10):
+              expiry = datetime.now() + timedelta(hours=24)
+              keys.append({
+                  'key': generate_key(),
+                  'generated': datetime.now().isoformat(),
+                  'expiry': int(expiry.timestamp()),
+                  'used': False,
+                  'usedAt': None
+              })
+          
+          # Salvar
+          with open('keys.json', 'w') as f:
+              json.dump(keys, f, indent=2)
+          
+          print(f"✅ {len(keys)} keys disponíveis")
+          EOF
+      
+      - name: Commit and Push
+        run: |
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Action"
+          git add keys.json
+          git diff --quiet && git diff --staged --quiet || (git commit -m "🔑 Auto-generate keys $(date)" && git push)
