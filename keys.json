@@ -1,1 +1,9 @@
-[]
+[
+  {
+    "key": "TEST1234567890ABCDEF",
+    "generated": "2025-11-07T10:00:00.000Z",
+    "expiry": 9999999999,
+    "used": false,
+    "usedAt": null
+  }
+]
