@@ -22,20 +22,6 @@
             justify-content: center;
             align-items: center;
             padding: 20px;
-            position: relative;
-        }
-
-        body::before {
-            content: '';
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: 
-                radial-gradient(circle at 20% 50%, rgba(100, 150, 255, 0.05) 0%, transparent 50%),
-                radial-gradient(circle at 80% 80%, rgba(100, 150, 255, 0.05) 0%, transparent 50%);
-            pointer-events: none;
         }
 
         .container {
@@ -44,22 +30,8 @@
             padding: 40px;
             max-width: 600px;
             width: 100%;
-            box-shadow: 
-                0 8px 32px rgba(0, 0, 0, 0.4),
-                inset 0 1px 0 rgba(255, 255, 255, 0.05);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
             border: 1px solid #3a3a3a;
-            animation: fadeIn 0.5s ease;
-        }
-
-        @keyframes fadeIn {
-            from {
-                opacity: 0;
-                transform: translateY(20px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
         }
 
         .header {
@@ -75,16 +47,39 @@
             background: linear-gradient(135deg, #6496ff 0%, #4a7ce8 100%);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
-            background-clip: text;
             margin-bottom: 5px;
-            letter-spacing: 2px;
         }
 
         .subtitle {
             color: #888;
             font-size: 0.95em;
-            font-weight: 300;
-            letter-spacing: 1px;
+        }
+
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 15px;
+            margin-bottom: 30px;
+        }
+
+        .stat-card {
+            background: linear-gradient(145deg, #252525 0%, #1a1a1a 100%);
+            padding: 20px;
+            border-radius: 12px;
+            border: 1px solid #3a3a3a;
+            text-align: center;
+        }
+
+        .stat-value {
+            font-size: 2em;
+            font-weight: 700;
+            color: #6496ff;
+            margin-bottom: 5px;
+        }
+
+        .stat-label {
+            color: #888;
+            font-size: 0.85em;
         }
 
         .progress-section {
@@ -97,7 +92,6 @@
             margin-bottom: 12px;
             color: #aaa;
             font-size: 0.9em;
-            font-weight: 500;
         }
 
         .progress-bar {
@@ -106,31 +100,13 @@
             background: #1a1a1a;
             border-radius: 10px;
             overflow: hidden;
-            position: relative;
         }
 
         .progress-fill {
             height: 100%;
             background: linear-gradient(90deg, #6496ff 0%, #4a7ce8 100%);
-            transition: width 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+            transition: width 0.5s ease;
             border-radius: 10px;
-            position: relative;
-        }
-
-        .progress-fill::after {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
-            animation: shimmer 2s infinite;
-        }
-
-        @keyframes shimmer {
-            0% { transform: translateX(-100%); }
-            100% { transform: translateX(200%); }
         }
 
         .missions {
@@ -168,15 +144,12 @@
             align-items: center;
             justify-content: center;
             font-weight: 700;
-            font-size: 1.1em;
             color: #6496ff;
-            border: 1px solid #4a4a4a;
         }
 
         .mission h3 {
             font-size: 1.1em;
             font-weight: 600;
-            color: #fff;
         }
 
         .mission p {
@@ -198,33 +171,23 @@
             transition: all 0.3s ease;
             width: 100%;
             font-family: 'Poppins', sans-serif;
-            box-shadow: 0 4px 15px rgba(100, 150, 255, 0.3);
         }
 
         .mission-button:hover {
             transform: translateY(-2px);
-            box-shadow: 0 6px 20px rgba(100, 150, 255, 0.4);
         }
 
         .mission-button:disabled {
-            background: linear-gradient(135deg, #2a2a2a 0%, #1a1a1a 100%);
+            background: #2a2a2a;
             cursor: not-allowed;
             transform: none;
-            box-shadow: none;
             color: #666;
         }
 
         .mission-button.completed {
-            background: linear-gradient(135deg, #2a2a2a 0%, #1a1a1a 100%);
+            background: #2a2a2a;
             border: 2px solid #4caf50;
             color: #4caf50;
-            box-shadow: none;
-        }
-
-        .timer {
-            color: #6496ff;
-            font-weight: 600;
-            margin-left: 8px;
         }
 
         .key-display {
@@ -235,6 +198,10 @@
             text-align: center;
             margin-top: 25px;
             display: none;
+        }
+
+        .key-display.active {
+            display: block;
             animation: slideUp 0.6s ease;
         }
 
@@ -249,15 +216,10 @@
             }
         }
 
-        .key-display.active {
-            display: block;
-        }
-
         .key-display h2 {
             color: #6496ff;
             font-size: 1.8em;
             margin-bottom: 15px;
-            font-weight: 700;
         }
 
         .key-box {
@@ -278,32 +240,6 @@
             word-break: break-all;
         }
 
-        .key-info {
-            display: flex;
-            justify-content: space-around;
-            margin: 20px 0;
-            padding: 15px;
-            background: rgba(100, 150, 255, 0.1);
-            border-radius: 8px;
-            border: 1px solid rgba(100, 150, 255, 0.2);
-        }
-
-        .key-info-item {
-            text-align: center;
-        }
-
-        .key-info-label {
-            color: #888;
-            font-size: 0.85em;
-            margin-bottom: 5px;
-        }
-
-        .key-info-value {
-            color: #6496ff;
-            font-weight: 600;
-            font-size: 1.1em;
-        }
-
         .copy-button {
             background: linear-gradient(135deg, #4caf50 0%, #45a049 100%);
             color: white;
@@ -313,95 +249,22 @@
             cursor: pointer;
             font-weight: 600;
             font-size: 1em;
-            transition: all 0.3s ease;
             font-family: 'Poppins', sans-serif;
-            box-shadow: 0 4px 15px rgba(76, 175, 80, 0.3);
         }
 
         .copy-button:hover {
             transform: translateY(-2px);
-            box-shadow: 0 6px 20px rgba(76, 175, 80, 0.4);
         }
 
-        .instructions {
-            margin-top: 20px;
-            padding: 15px;
-            background: rgba(100, 150, 255, 0.05);
-            border-radius: 8px;
-            border: 1px solid rgba(100, 150, 255, 0.2);
-            text-align: left;
-        }
-
-        .instructions p {
-            color: #aaa;
-            font-size: 0.9em;
-            line-height: 1.8;
-            margin: 5px 0;
-        }
-
-        .instructions strong {
-            color: #6496ff;
-        }
-
-        .footer {
+        .loading {
             text-align: center;
-            margin-top: 30px;
-            padding-top: 20px;
-            border-top: 1px solid #3a3a3a;
-        }
-
-        .footer-text {
-            color: #666;
-            font-size: 0.85em;
-            margin-bottom: 10px;
-        }
-
-        .creator-link {
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-            color: #6496ff;
-            text-decoration: none;
-            font-weight: 600;
-            transition: all 0.3s ease;
-            padding: 8px 15px;
-            border-radius: 8px;
-            background: rgba(100, 150, 255, 0.1);
-        }
-
-        .creator-link:hover {
-            background: rgba(100, 150, 255, 0.2);
-            transform: translateY(-2px);
-        }
-
-        .generating-overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.8);
-            display: none;
-            justify-content: center;
-            align-items: center;
-            z-index: 1000;
-        }
-
-        .generating-overlay.active {
-            display: flex;
-        }
-
-        .generating-content {
-            background: linear-gradient(145deg, #2a2a2a 0%, #1a1a1a 100%);
             padding: 40px;
-            border-radius: 15px;
-            text-align: center;
-            border: 1px solid #3a3a3a;
+            color: #6496ff;
         }
 
         .spinner {
-            width: 60px;
-            height: 60px;
+            width: 50px;
+            height: 50px;
             border: 4px solid #2a2a2a;
             border-top: 4px solid #6496ff;
             border-radius: 50%;
@@ -414,40 +277,49 @@
             100% { transform: rotate(360deg); }
         }
 
-        .generating-text {
-            color: #6496ff;
-            font-size: 1.2em;
-            font-weight: 600;
+        .error {
+            background: rgba(255, 0, 0, 0.1);
+            border: 1px solid rgba(255, 0, 0, 0.3);
+            padding: 20px;
+            border-radius: 8px;
+            color: #ff6b6b;
+            margin: 20px 0;
         }
 
-        @media (max-width: 600px) {
-            .container {
-                padding: 25px;
-            }
+        .footer {
+            text-align: center;
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 1px solid #3a3a3a;
+        }
 
-            .logo {
-                font-size: 2em;
-            }
-
-            .key-text {
-                font-size: 1.2em;
-                letter-spacing: 2px;
-            }
+        .creator-link {
+            color: #6496ff;
+            text-decoration: none;
+            font-weight: 600;
         }
     </style>
 </head>
 <body>
-    <div class="generating-overlay" id="generatingOverlay">
-        <div class="generating-content">
-            <div class="spinner"></div>
-            <div class="generating-text">Gerando sua key aleatória...</div>
-        </div>
-    </div>
-
     <div class="container">
         <div class="header">
             <div class="logo">MM2 PROFESSIONAL</div>
             <div class="subtitle">Sistema de Key | by 14x_ice</div>
+        </div>
+
+        <div class="stats" id="stats">
+            <div class="stat-card">
+                <div class="stat-value" id="totalKeys">-</div>
+                <div class="stat-label">Keys Disponíveis</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value" id="usedKeys">-</div>
+                <div class="stat-label">Keys Usadas</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value" id="validKeys">-</div>
+                <div class="stat-label">Keys Válidas</div>
+            </div>
         </div>
 
         <div class="progress-section">
@@ -477,9 +349,9 @@
                     <div class="mission-number">2</div>
                     <h3>Curtir Página</h3>
                 </div>
-                <p>Aguarde e curta a página</p>
+                <p>Aguarde 15 segundos</p>
                 <button class="mission-button" onclick="completeMission(2)" id="mission2" disabled>
-                    Aguarde<span class="timer" id="timer2">15s</span>
+                    Aguarde <span id="timer">15s</span>
                 </button>
             </div>
 
@@ -507,101 +379,75 @@
         </div>
 
         <div class="key-display" id="keyDisplay">
-            <h2>🔑 KEY GERADA</h2>
+            <h2>🔑 SUA KEY</h2>
             <div class="key-box">
                 <div class="key-text" id="generatedKey"></div>
             </div>
-            <div class="key-info">
-                <div class="key-info-item">
-                    <div class="key-info-label">Validade</div>
-                    <div class="key-info-value">24 horas</div>
-                </div>
-                <div class="key-info-item">
-                    <div class="key-info-label">Usos</div>
-                    <div class="key-info-value">1x</div>
-                </div>
-                <div class="key-info-item">
-                    <div class="key-info-label">Expira em</div>
-                    <div class="key-info-value" id="expiryTime"></div>
-                </div>
-            </div>
             <button class="copy-button" onclick="copyKey()">📋 Copiar Key</button>
-            <div class="instructions">
-                <p><strong>INSTRUÇÕES:</strong></p>
-                <p>1. Copie a key acima</p>
-                <p>2. Execute o script no Roblox</p>
-                <p>3. Cole a key quando solicitado</p>
-                <p>4. Esta key é ÚNICA e expira em 24 horas!</p>
-                <p><strong>⚠️ ATENÇÃO:</strong> Cada key é gerada aleatoriamente e só pode ser usada UMA VEZ!</p>
+            <div style="margin-top: 20px; color: #888; font-size: 0.9em;">
+                <p>⚠️ Esta key expira em 24 horas</p>
+                <p>⚠️ Cada key só pode ser usada UMA VEZ</p>
             </div>
         </div>
 
         <div class="footer">
-            <div class="footer-text">Criado por</div>
+            <div style="color: #666; margin-bottom: 10px;">Criado por</div>
             <a href="https://www.roblox.com/users/3660389049/profile" target="_blank" class="creator-link">
-                <span>🎮</span>
-                <span>14x_ice</span>
+                14x_ice
             </a>
         </div>
     </div>
 
     <script>
-        // Estado do progresso
+        // IMPORTANTE: Substitua 'SEU_USUARIO' e 'SEU_REPO' pelos seus dados do GitHub
+        const GITHUB_KEYS_URL = 'https://raw.githubusercontent.com/aaaaa1221aa/CN14X-HUD/main/keys.json';
+        
         const state = {
-            completed: JSON.parse(sessionStorage.getItem('mm2_completed') || '[]')
+            completed: JSON.parse(sessionStorage.getItem('mm2_completed') || '[]'),
+            keys: [],
+            selectedKey: null
         };
 
-        // Função para gerar key COMPLETAMENTE ALEATÓRIA
-        function generateRandomKey() {
-            const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
-            let key = '';
-            
-            // Usar crypto.getRandomValues para mais aleatoriedade
-            const randomValues = new Uint8Array(20);
-            crypto.getRandomValues(randomValues);
-            
-            for (let i = 0; i < 20; i++) {
-                const randomIndex = randomValues[i] % chars.length;
-                key += chars.charAt(randomIndex);
+        // Carregar keys do GitHub
+        async function loadKeys() {
+            try {
+                const response = await fetch(GITHUB_KEYS_URL + '?cache=' + Date.now());
+                const keys = await response.json();
+                
+                const now = Math.floor(Date.now() / 1000);
+                
+                // Filtrar keys válidas
+                const validKeys = keys.filter(k => !k.used && k.expiry > now);
+                const usedKeys = keys.filter(k => k.used).length;
+                
+                // Atualizar estatísticas
+                document.getElementById('totalKeys').textContent = keys.length;
+                document.getElementById('usedKeys').textContent = usedKeys;
+                document.getElementById('validKeys').textContent = validKeys.length;
+                
+                state.keys = validKeys;
+                
+                if (validKeys.length === 0) {
+                    alert('⚠️ Não há keys disponíveis no momento. Tente novamente mais tarde!');
+                }
+                
+                return validKeys;
+            } catch (error) {
+                console.error('Erro ao carregar keys:', error);
+                document.getElementById('totalKeys').textContent = '?';
+                document.getElementById('usedKeys').textContent = '?';
+                document.getElementById('validKeys').textContent = '?';
+                return [];
             }
-            
-            return key;
-        }
-
-        // Função para salvar key no sistema
-        async function saveKeyToSystem(key) {
-            const now = new Date();
-            const expiry = new Date(now.getTime() + 24 * 60 * 60 * 1000);
-            
-            const keyData = {
-                key: key,
-                generated: now.toISOString(),
-                expiry: Math.floor(expiry.getTime() / 1000), // Unix timestamp
-                used: false,
-                usedAt: null,
-                ip: 'anonymous', // Em produção, você pegaria o IP real
-                userAgent: navigator.userAgent
-            };
-
-            // Salvar no localStorage (simulando banco de dados)
-            const allKeys = JSON.parse(localStorage.getItem('mm2_all_keys') || '[]');
-            allKeys.push(keyData);
-            localStorage.setItem('mm2_all_keys', JSON.stringify(allKeys));
-            
-            // Console log para debug (você pode copiar isso para GitHub)
-            console.log('Nova key gerada:', JSON.stringify(keyData, null, 2));
-            
-            return keyData;
         }
 
         // Atualizar progresso
         function updateProgress() {
             const completed = state.completed.length;
-            const total = 4;
-            const percentage = (completed / total) * 100;
+            const percentage = (completed / 4) * 100;
             
             document.getElementById('progressBar').style.width = percentage + '%';
-            document.getElementById('progressText').textContent = `${completed}/${total} Completas`;
+            document.getElementById('progressText').textContent = `${completed}/4 Completas`;
 
             // Marcar missões completadas
             state.completed.forEach(mission => {
@@ -623,55 +469,56 @@
             }
 
             // Gerar key quando completar todas
-            if (completed === 4) {
+            if (completed === 4 && !state.selectedKey) {
                 setTimeout(async () => {
-                    // Mostrar overlay de loading
-                    document.getElementById('generatingOverlay').classList.add('active');
-                    
-                    // Simular tempo de geração (para parecer mais real)
-                    await new Promise(resolve => setTimeout(resolve, 2000));
-                    
-                    // Gerar key completamente aleatória
-                    const key = generateRandomKey();
-                    const keyData = await saveKeyToSystem(key);
-                    
-                    // Resetar missões para próxima vez
-                    sessionStorage.setItem('mm2_completed', '[]');
-                    
-                    // Esconder overlay
-                    document.getElementById('generatingOverlay').classList.remove('active');
-                    
-                    // Mostrar key
-                    displayKey(key, keyData.expiry);
-                    
-                    // Alert de sucesso
-                    console.log('✅ KEY GERADA COM SUCESSO!');
-                    console.log('🔑 Key:', key);
-                    console.log('⏰ Expira em:', new Date(keyData.expiry * 1000).toLocaleString());
+                    await generateKey();
                 }, 500);
             }
         }
 
-        // Mostrar key gerada
-        function displayKey(key, expiry) {
-            document.getElementById('generatedKey').textContent = key;
+        // Gerar key (pegar do GitHub)
+        async function generateKey() {
+            const validKeys = await loadKeys();
             
-            const expiryDate = new Date(expiry * 1000);
-            const hours = expiryDate.getHours().toString().padStart(2, '0');
-            const minutes = expiryDate.getMinutes().toString().padStart(2, '0');
-            document.getElementById('expiryTime').textContent = `${hours}:${minutes}`;
+            if (validKeys.length === 0) {
+                alert('❌ Não há keys disponíveis. Entre em contato com o desenvolvedor!');
+                return;
+            }
+
+            // Selecionar key aleatória
+            const randomIndex = Math.floor(Math.random() * validKeys.length);
+            const selectedKey = validKeys[randomIndex];
             
+            state.selectedKey = selectedKey.key;
+            
+            // Mostrar key
+            document.getElementById('generatedKey').textContent = selectedKey.key;
             document.getElementById('keyDisplay').classList.add('active');
             
-            // Scroll suave até a key
+            // Scroll até a key
             setTimeout(() => {
-                document.getElementById('keyDisplay').scrollIntoView({ behavior: 'smooth', block: 'center' });
+                document.getElementById('keyDisplay').scrollIntoView({ behavior: 'smooth' });
             }, 300);
+
+            // Resetar progresso para próxima vez
+            sessionStorage.setItem('mm2_completed', '[]');
         }
 
         // Completar missão
         function completeMission(missionNumber) {
             if (!state.completed.includes(missionNumber)) {
+                // Abrir links
+                const links = {
+                    1: 'https://discord.gg/s6KHshcGt8',
+                    2: null, // Timer automático
+                    3: 'https://www.youtube.com/@14xice',
+                    4: 'https://www.roblox.com/users/3660389049/profile'
+                };
+
+                if (links[missionNumber]) {
+                    window.open(links[missionNumber], '_blank');
+                }
+
                 state.completed.push(missionNumber);
                 sessionStorage.setItem('mm2_completed', JSON.stringify(state.completed));
                 updateProgress();
@@ -689,7 +536,6 @@
                 
                 setTimeout(() => {
                     button.textContent = originalText;
-                    button.style.background = 'linear-gradient(135deg, #4caf50 0%, #45a049 100%)';
                 }, 2000);
             });
         }
@@ -698,41 +544,24 @@
         let countdown = 15;
         const timerInterval = setInterval(() => {
             countdown--;
-            const timerElement = document.getElementById('timer2');
-            if (timerElement && !state.completed.includes(1)) {
+            const timerElement = document.getElementById('timer');
+            if (timerElement && state.completed.includes(1) && !state.completed.includes(2)) {
                 timerElement.textContent = countdown + 's';
-            }
-            
-            if (countdown <= 0) {
-                clearInterval(timerInterval);
-                const mission2 = document.getElementById('mission2');
-                if (mission2 && state.completed.includes(1)) {
-                    mission2.disabled = false;
-                    mission2.innerHTML = 'Completar Missão';
+                
+                if (countdown <= 0) {
+                    clearInterval(timerInterval);
+                    const mission2 = document.getElementById('mission2');
+                    if (mission2) {
+                        mission2.disabled = false;
+                        mission2.innerHTML = 'Completar Missão';
+                    }
                 }
             }
         }, 1000);
 
-        // Links das missões
-        document.getElementById('mission1').addEventListener('click', function() {
-            window.open('https://discord.gg/s6KHshcGt8', '_blank');
-        });
-
-        document.getElementById('mission3').addEventListener('click', function() {
-            window.open('https://www.youtube.com/@14xice', '_blank');
-        });
-
-        document.getElementById('mission4').addEventListener('click', function() {
-            window.open('https://www.roblox.com/users/3660389049/profile', '_blank');
-        });
-
         // Inicializar
+        loadKeys();
         updateProgress();
-
-        // Debug: Ver todas as keys geradas
-        console.log('🔐 Sistema de Keys MM2 Professional');
-        console.log('📊 Total de keys geradas:', JSON.parse(localStorage.getItem('mm2_all_keys') || '[]').length);
-        console.log('💡 Para ver todas as keys: localStorage.getItem("mm2_all_keys")');
     </script>
 </body>
 </html>
