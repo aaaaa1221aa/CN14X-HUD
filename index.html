@@ -1,0 +1,678 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CN14X HUD - Key System</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Rajdhani:wght@300;400;600;700&display=swap');
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Rajdhani', sans-serif;
+            background: #0a0a0a;
+            color: #fff;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: 
+                radial-gradient(circle at 20% 50%, rgba(255, 0, 0, 0.1) 0%, transparent 50%),
+                radial-gradient(circle at 80% 80%, rgba(255, 0, 0, 0.1) 0%, transparent 50%);
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        .container {
+            background: linear-gradient(145deg, #1a1a1a 0%, #0f0f0f 100%);
+            border-radius: 20px;
+            padding: 40px;
+            max-width: 650px;
+            width: 100%;
+            box-shadow: 
+                0 0 50px rgba(255, 0, 0, 0.2),
+                inset 0 0 30px rgba(0, 0, 0, 0.5);
+            border: 1px solid #2a2a2a;
+            position: relative;
+            z-index: 1;
+            animation: slideIn 0.6s ease-out;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+            position: relative;
+        }
+
+        .logo {
+            font-size: 3.5em;
+            font-weight: 700;
+            background: linear-gradient(135deg, #ff0000 0%, #cc0000 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            letter-spacing: 3px;
+            text-shadow: 0 0 30px rgba(255, 0, 0, 0.3);
+            margin-bottom: 5px;
+        }
+
+        .subtitle {
+            color: #888;
+            font-size: 1.1em;
+            font-weight: 300;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+        }
+
+        .divider {
+            height: 2px;
+            background: linear-gradient(90deg, transparent 0%, #ff0000 50%, transparent 100%);
+            margin: 30px 0;
+        }
+
+        .progress-section {
+            margin-bottom: 30px;
+        }
+
+        .progress-label {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 10px;
+            color: #888;
+            font-size: 0.9em;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 35px;
+            background: #1a1a1a;
+            border-radius: 10px;
+            overflow: hidden;
+            border: 1px solid #2a2a2a;
+            position: relative;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #ff0000 0%, #cc0000 100%);
+            transition: width 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 700;
+            font-size: 1.1em;
+            letter-spacing: 1px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .progress-fill::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+            animation: shimmer 2s infinite;
+        }
+
+        @keyframes shimmer {
+            0% { left: -100%; }
+            100% { left: 200%; }
+        }
+
+        .mission-container {
+            display: grid;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .mission {
+            background: linear-gradient(145deg, #1a1a1a 0%, #141414 100%);
+            padding: 25px;
+            border-radius: 15px;
+            border: 1px solid #2a2a2a;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .mission::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 0, 0, 0.1), transparent);
+            transition: left 0.6s ease;
+        }
+
+        .mission:hover::before {
+            left: 100%;
+        }
+
+        .mission:hover {
+            border-color: #ff0000;
+            box-shadow: 0 0 20px rgba(255, 0, 0, 0.2);
+            transform: translateX(5px);
+        }
+
+        .mission-header {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 12px;
+        }
+
+        .mission-icon {
+            font-size: 2em;
+            width: 50px;
+            height: 50px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(135deg, #2a2a2a 0%, #1a1a1a 100%);
+            border-radius: 10px;
+            border: 1px solid #3a3a3a;
+        }
+
+        .mission h3 {
+            color: #fff;
+            font-size: 1.3em;
+            font-weight: 600;
+            letter-spacing: 1px;
+        }
+
+        .mission p {
+            color: #888;
+            font-size: 1em;
+            margin-bottom: 15px;
+            margin-left: 65px;
+        }
+
+        .mission-button {
+            background: linear-gradient(135deg, #ff0000 0%, #cc0000 100%);
+            color: white;
+            border: none;
+            padding: 14px 30px;
+            border-radius: 10px;
+            cursor: pointer;
+            font-weight: 700;
+            font-size: 1em;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            transition: all 0.3s ease;
+            width: 100%;
+            position: relative;
+            overflow: hidden;
+            font-family: 'Rajdhani', sans-serif;
+        }
+
+        .mission-button::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.3);
+            transform: translate(-50%, -50%);
+            transition: width 0.6s, height 0.6s;
+        }
+
+        .mission-button:hover::before {
+            width: 300px;
+            height: 300px;
+        }
+
+        .mission-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 30px rgba(255, 0, 0, 0.4);
+        }
+
+        .mission-button:disabled {
+            background: linear-gradient(135deg, #2a2a2a 0%, #1a1a1a 100%);
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+
+        .mission-button.completed {
+            background: linear-gradient(135deg, #2a2a2a 0%, #1a1a1a 100%);
+            border: 1px solid #00ff00;
+            color: #00ff00;
+        }
+
+        .timer {
+            color: #ff0000;
+            font-weight: 700;
+            margin-left: 10px;
+            font-size: 1.1em;
+        }
+
+        .key-display {
+            background: linear-gradient(145deg, #1a1a1a 0%, #0f0f0f 100%);
+            border: 2px solid #ff0000;
+            border-radius: 15px;
+            padding: 30px;
+            text-align: center;
+            margin-top: 30px;
+            display: none;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .key-display::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255, 0, 0, 0.1) 0%, transparent 70%);
+            animation: rotate 8s linear infinite;
+        }
+
+        @keyframes rotate {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
+        .key-display.active {
+            display: block;
+            animation: keyAppear 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        @keyframes keyAppear {
+            from {
+                opacity: 0;
+                transform: scale(0.8);
+            }
+            to {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+
+        .key-display h2 {
+            color: #ff0000;
+            font-size: 2em;
+            margin-bottom: 10px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .key-display > p {
+            color: #888;
+            margin-bottom: 20px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .key-box {
+            background: #0a0a0a;
+            border: 1px solid #2a2a2a;
+            border-radius: 10px;
+            padding: 20px;
+            margin: 20px 0;
+            position: relative;
+            z-index: 1;
+        }
+
+        .key-text {
+            font-size: 1.8em;
+            font-weight: 700;
+            color: #ff0000;
+            letter-spacing: 4px;
+            font-family: 'Courier New', monospace;
+            user-select: all;
+            text-shadow: 0 0 10px rgba(255, 0, 0, 0.5);
+        }
+
+        .copy-button {
+            background: linear-gradient(135deg, #00ff00 0%, #00cc00 100%);
+            color: #000;
+            border: none;
+            padding: 14px 50px;
+            border-radius: 10px;
+            cursor: pointer;
+            font-weight: 700;
+            font-size: 1.1em;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            margin-top: 15px;
+            transition: all 0.3s ease;
+            font-family: 'Rajdhani', sans-serif;
+            position: relative;
+            z-index: 1;
+        }
+
+        .copy-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 30px rgba(0, 255, 0, 0.4);
+        }
+
+        .key-instructions {
+            margin-top: 20px;
+            padding: 15px;
+            background: rgba(255, 0, 0, 0.1);
+            border-radius: 10px;
+            border: 1px solid rgba(255, 0, 0, 0.3);
+            position: relative;
+            z-index: 1;
+        }
+
+        .key-instructions p {
+            color: #ccc;
+            font-size: 0.95em;
+            line-height: 1.6;
+        }
+
+        .credits {
+            text-align: center;
+            margin-top: 40px;
+            padding-top: 30px;
+            border-top: 1px solid #2a2a2a;
+        }
+
+        .credits-title {
+            color: #888;
+            font-size: 0.9em;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            margin-bottom: 15px;
+        }
+
+        .creator {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            background: linear-gradient(135deg, #1a1a1a 0%, #0f0f0f 100%);
+            padding: 15px 30px;
+            border-radius: 10px;
+            border: 1px solid #2a2a2a;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            color: #fff;
+        }
+
+        .creator:hover {
+            border-color: #ff0000;
+            box-shadow: 0 0 20px rgba(255, 0, 0, 0.3);
+            transform: translateY(-2px);
+        }
+
+        .creator-name {
+            font-size: 1.3em;
+            font-weight: 700;
+            color: #ff0000;
+        }
+
+        @media (max-width: 600px) {
+            .container {
+                padding: 25px;
+            }
+
+            .logo {
+                font-size: 2.5em;
+            }
+
+            .mission h3 {
+                font-size: 1.1em;
+            }
+
+            .key-text {
+                font-size: 1.3em;
+                letter-spacing: 2px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div class="logo">CN14X HUD</div>
+            <div class="subtitle">Key System</div>
+        </div>
+
+        <div class="divider"></div>
+
+        <div class="progress-section">
+            <div class="progress-label">
+                <span>Progresso das Missões</span>
+                <span id="progressText">0/4 Completas</span>
+            </div>
+            <div class="progress-bar">
+                <div class="progress-fill" id="progressBar">0%</div>
+            </div>
+        </div>
+
+        <div class="mission-container">
+            <div class="mission">
+                <div class="mission-header">
+                    <div class="mission-icon">💬</div>
+                    <h3>Missão 1: Discord</h3>
+                </div>
+                <p>Entre no nosso servidor Discord oficial</p>
+                <button class="mission-button" onclick="completeMission(1)" id="mission1">
+                    Completar Missão
+                </button>
+            </div>
+
+            <div class="mission">
+                <div class="mission-header">
+                    <div class="mission-icon">👍</div>
+                    <h3>Missão 2: Like</h3>
+                </div>
+                <p>Aguarde e curta a página</p>
+                <button class="mission-button" onclick="completeMission(2)" id="mission2" disabled>
+                    Aguarde<span class="timer" id="timer2">15s</span>
+                </button>
+            </div>
+
+            <div class="mission">
+                <div class="mission-header">
+                    <div class="mission-icon">📺</div>
+                    <h3>Missão 3: YouTube</h3>
+                </div>
+                <p>Inscreva-se no canal e ative o sino</p>
+                <button class="mission-button" onclick="completeMission(3)" id="mission3" disabled>
+                    Completar Missão
+                </button>
+            </div>
+
+            <div class="mission">
+                <div class="mission-header">
+                    <div class="mission-icon">🎮</div>
+                    <h3>Missão 4: Roblox</h3>
+                </div>
+                <p>Siga o perfil no Roblox</p>
+                <button class="mission-button" onclick="completeMission(4)" id="mission4" disabled>
+                    Completar Missão
+                </button>
+            </div>
+        </div>
+
+        <div class="key-display" id="keyDisplay">
+            <h2>🔑 KEY GERADA</h2>
+            <p>Sua key foi gerada com sucesso!</p>
+            <div class="key-box">
+                <div class="key-text" id="generatedKey"></div>
+            </div>
+            <button class="copy-button" onclick="copyKey()">📋 COPIAR KEY</button>
+            <div class="key-instructions">
+                <p><strong>INSTRUÇÕES:</strong></p>
+                <p>1. Copie a key acima</p>
+                <p>2. Execute o script no Roblox</p>
+                <p>3. Cole a key quando solicitado</p>
+                <p>4. Aproveite o CN14X HUD!</p>
+            </div>
+        </div>
+
+        <div class="credits">
+            <div class="credits-title">Criado Por</div>
+            <a href="https://www.roblox.com/users/3660389049/profile" target="_blank" class="creator">
+                <span>🎮</span>
+                <span class="creator-name">14x_ice</span>
+            </a>
+        </div>
+    </div>
+
+    <script>
+        const state = {
+            completed: JSON.parse(localStorage.getItem('cn14x_completed') || '[]'),
+            generatedKey: localStorage.getItem('cn14x_key') || null
+        };
+
+        function generateKey() {
+            const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+            let key = '';
+            for (let i = 0; i < 20; i++) {
+                key += chars.charAt(Math.floor(Math.random() * chars.length));
+                if ((i + 1) % 5 === 0 && i < 19) key += '-';
+            }
+            return key;
+        }
+
+        function saveKey(key) {
+            const keys = JSON.parse(localStorage.getItem('cn14x_validKeys') || '[]');
+            keys.push({
+                key: key.replace(/-/g, ''),
+                generated: new Date().toISOString(),
+                used: false
+            });
+            localStorage.setItem('cn14x_validKeys', JSON.stringify(keys));
+        }
+
+        function updateProgress() {
+            const completed = state.completed.length;
+            const total = 4;
+            const percentage = (completed / total) * 100;
+            
+            document.getElementById('progressBar').style.width = percentage + '%';
+            document.getElementById('progressBar').textContent = Math.round(percentage) + '%';
+            document.getElementById('progressText').textContent = `${completed}/${total} Completas`;
+
+            state.completed.forEach(mission => {
+                const button = document.getElementById(`mission${mission}`);
+                if (button) {
+                    button.classList.add('completed');
+                    button.innerHTML = '✓ COMPLETADA';
+                    button.disabled = true;
+                }
+            });
+
+            if (completed < 4) {
+                const nextMission = completed + 1;
+                const nextButton = document.getElementById(`mission${nextMission}`);
+                if (nextButton && !state.completed.includes(nextMission)) {
+                    nextButton.disabled = false;
+                }
+            }
+
+            if (completed === 4 && !state.generatedKey) {
+                setTimeout(() => {
+                    const key = generateKey();
+                    state.generatedKey = key;
+                    localStorage.setItem('cn14x_key', key);
+                    saveKey(key);
+                    
+                    document.getElementById('generatedKey').textContent = key;
+                    document.getElementById('keyDisplay').classList.add('active');
+                }, 1000);
+            } else if (state.generatedKey) {
+                document.getElementById('generatedKey').textContent = state.generatedKey;
+                document.getElementById('keyDisplay').classList.add('active');
+            }
+        }
+
+        function completeMission(missionNumber) {
+            if (!state.completed.includes(missionNumber)) {
+                state.completed.push(missionNumber);
+                localStorage.setItem('cn14x_completed', JSON.stringify(state.completed));
+                updateProgress();
+            }
+        }
+
+        function copyKey() {
+            const keyText = document.getElementById('generatedKey').textContent;
+            navigator.clipboard.writeText(keyText.replace(/-/g, '')).then(() => {
+                const button = event.target;
+                const originalText = button.textContent;
+                button.innerHTML = '✓ COPIADO!';
+                button.style.background = 'linear-gradient(135deg, #00ff00 0%, #00cc00 100%)';
+                
+                setTimeout(() => {
+                    button.innerHTML = originalText;
+                }, 2000);
+            });
+        }
+
+        let countdown = 15;
+        const timer = setInterval(() => {
+            countdown--;
+            const timerElement = document.getElementById('timer2');
+            if (timerElement && !state.completed.includes(1)) {
+                timerElement.textContent = countdown + 's';
+            }
+            
+            if (countdown <= 0) {
+                clearInterval(timer);
+                const mission2 = document.getElementById('mission2');
+                if (mission2 && state.completed.includes(1)) {
+                    mission2.disabled = false;
+                    mission2.innerHTML = 'COMPLETAR MISSÃO';
+                }
+            }
+        }, 1000);
+
+        updateProgress();
+
+        document.getElementById('mission1').addEventListener('click', function() {
+            window.open('https://discord.gg/seu-servidor', '_blank');
+        });
+
+        document.getElementById('mission3').addEventListener('click', function() {
+            window.open('https://youtube.com/@seu-canal', '_blank');
+        });
+
+        document.getElementById('mission4').addEventListener('click', function() {
+            window.open('https://www.roblox.com/users/3660389049/profile', '_blank');
+        });
+    </script>
+</body>
+</html>
