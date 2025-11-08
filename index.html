@@ -250,6 +250,7 @@
             font-weight: 600;
             font-size: 1em;
             font-family: 'Poppins', sans-serif;
+            transition: all 0.3s ease;
         }
 
         .copy-button:hover {
@@ -324,6 +325,10 @@
             color: #6496ff;
             text-decoration: none;
             font-weight: 600;
+        }
+
+        .creator-link:hover {
+            text-decoration: underline;
         }
     </style>
 </head>
@@ -436,16 +441,14 @@
     </div>
 
     <script>
-        // Configuração - URL do seu repositório GitHub
+        // Configuração
         const GITHUB_USER = 'aaaaa1221aa';
         const GITHUB_REPO = 'CN14X-HUD';
         const KEYS_FILE = 'keys.json';
-        const GITHUB_API = `https://api.github.com/repos/${GITHUB_USER}/${GITHUB_REPO}/contents/${KEYS_FILE}`;
         const GITHUB_RAW = `https://raw.githubusercontent.com/${GITHUB_USER}/${GITHUB_REPO}/main/${KEYS_FILE}`;
         
         const state = {
             completed: JSON.parse(sessionStorage.getItem('mm2_completed') || '[]'),
-            githubToken: null // GitHub Pages não pode fazer commits, mas podemos usar Gist ou Issues
         };
 
         // Gerar key aleatória
@@ -461,7 +464,7 @@
             return key;
         }
 
-        // Carregar estatísticas do GitHub
+        // Carregar estatísticas
         async function loadStats() {
             try {
                 const response = await fetch(GITHUB_RAW + '?cache=' + Date.now());
@@ -480,30 +483,6 @@
                 document.getElementById('validKeys').textContent = '?';
                 document.getElementById('usedKeys').textContent = '?';
             }
-        }
-
-        // Salvar key no localStorage (simulação enquanto não há backend)
-        async function saveKeyLocally(keyData) {
-            // Como GitHub Pages é estático, salvamos localmente
-            // A key será validada pelo script Roblox buscando no keys.json
-            
-            const allKeys = JSON.parse(localStorage.getItem('mm2_generated_keys') || '[]');
-            allKeys.push(keyData);
-            localStorage.setItem('mm2_generated_keys', JSON.stringify(allKeys));
-            
-            // Log para o console (você pode copiar e adicionar manualmente no keys.json)
-            console.log('═══════════════════════════════════════');
-            console.log('🔑 NOVA KEY GERADA');
-            console.log('═══════════════════════════════════════');
-            console.log('Key:', keyData.key);
-            console.log('Gerada:', new Date(keyData.generated).toLocaleString());
-            console.log('Expira:', new Date(keyData.expiry * 1000).toLocaleString());
-            console.log('═══════════════════════════════════════');
-            console.log('📋 COPIE E ADICIONE NO keys.json:');
-            console.log(JSON.stringify(keyData, null, 2));
-            console.log('═══════════════════════════════════════');
-            
-            return true;
         }
 
         // Gerar key completa
@@ -525,15 +504,37 @@
                 usedAt: null
             };
             
-            document.getElementById('loadingText').textContent = 'Salvando no sistema...';
+            document.getElementById('loadingText').textContent = 'Key gerada! Adicionando ao sistema...';
             await new Promise(resolve => setTimeout(resolve, 1000));
             
-            await saveKeyLocally(keyData);
+            // Salvar localmente
+            const allKeys = JSON.parse(localStorage.getItem('mm2_generated_keys') || '[]');
+            allKeys.push(keyData);
+            localStorage.setItem('mm2_generated_keys', JSON.stringify(allKeys));
+            
+            // Log para adicionar manualmente
+            console.log('═══════════════════════════════════════');
+            console.log('🔑 NOVA KEY GERADA');
+            console.log('═══════════════════════════════════════');
+            console.log('Key:', keyData.key);
+            console.log('Gerada:', new Date(keyData.generated).toLocaleString());
+            console.log('Expira:', new Date(keyData.expiry * 1000).toLocaleString());
+            console.log('═══════════════════════════════════════');
+            console.log('📋 ADICIONE NO keys.json (COPIE ABAIXO):');
+            console.log('═══════════════════════════════════════');
+            console.log(JSON.stringify(keyData, null, 2));
+            console.log('═══════════════════════════════════════');
+            console.log('⚠️  INSTRUÇÕES:');
+            console.log('1. Vá em: https://github.com/aaaaa1221aa/CN14X-HUD');
+            console.log('2. Clique em keys.json');
+            console.log('3. Clique no lápis (Edit)');
+            console.log('4. Adicione a key acima na lista');
+            console.log('5. Faça commit');
+            console.log('═══════════════════════════════════════');
             
             document.getElementById('loadingOverlay').classList.remove('active');
             displayKey(key);
             
-            // Recarregar stats
             await loadStats();
         }
 
@@ -604,8 +605,9 @@
         // Copiar key
         function copyKey() {
             const keyText = document.getElementById('generatedKey').textContent;
+            const button = document.querySelector('.copy-button');
+            
             navigator.clipboard.writeText(keyText).then(() => {
-                const button = event.target;
                 button.textContent = '✓ COPIADO!';
                 setTimeout(() => {
                     button.textContent = '📋 Copiar Key';
@@ -636,14 +638,8 @@
         loadStats();
         updateProgress();
         
-        // Mostrar instruções no console
         console.log('%c🔐 MM2 PROFESSIONAL - SISTEMA DE KEYS', 'font-size: 16px; font-weight: bold; color: #6496ff');
-        console.log('%c📝 Como adicionar keys manualmente no GitHub:', 'font-size: 14px; color: #4caf50');
-        console.log('1. Vá em: https://github.com/aaaaa1221aa/CN14X-HUD');
-        console.log('2. Edite o arquivo keys.json');
-        console.log('3. Adicione a key que aparece no console');
-        console.log('4. Faça commit');
-        console.log('5. A key estará disponível em ~1 minuto');
+        console.log('%c📝 Keys geradas aparecem aqui no console!', 'font-size: 14px; color: #4caf50');
     </script>
 </body>
 </html>
