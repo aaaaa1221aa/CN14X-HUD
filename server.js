@@ -1,103 +1,114 @@
 // server.js
+require('dotenv').config();
 const express = require('express');
-const fs = require('fs').promises;
-const path = require('path');
+const { Octokit } = require('@octokit/rest');
 
 const app = express();
-app.use(express.json());
+app.use(express.json({ limit: '1mb' }));
 
-const KEYS_FILE = path.join(__dirname, 'keys.json');
-const TEMP_FILE = path.join(__dirname, 'keys.json.tmp');
+const GITHUB_TOKEN = process.env.GITHUB_TOKEN;
+const REPO_OWNER = process.env.REPO_OWNER; // ex: 'aaaaa1221aa'
+const REPO_NAME = process.env.REPO_NAME;   // ex: 'CN14X-HUD'
+const KEYS_PATH = process.env.KEYS_PATH || 'keys.json'; // caminho no repo
 
-async function readKeysFile() {
+if (!GITHUB_TOKEN || !REPO_OWNER || !REPO_NAME) {
+  console.error('Defina GITHUB_TOKEN, REPO_OWNER e REPO_NAME nas env vars');
+  process.exit(1);
+}
+
+const octokit = new Octokit({ auth: GITHUB_TOKEN });
+
+// Helper: pega conteúdo atual do arquivo no repo (retorna {content, sha})
+async function getFileContent(path) {
   try {
-    const raw = await fs.readFile(KEYS_FILE, 'utf8');
-    const parsed = JSON.parse(raw);
-    if (typeof parsed !== 'object' || parsed === null) throw new Error('Formato inválido');
-    return parsed;
+    const resp = await octokit.repos.getContent({
+      owner: REPO_OWNER,
+      repo: REPO_NAME,
+      path,
+    });
+    // resp.data.content é base64
+    const base64 = resp.data.content;
+    const sha = resp.data.sha;
+    const buff = Buffer.from(base64, 'base64');
+    const text = buff.toString('utf8');
+    return { text, sha };
   } catch (err) {
-    // Se arquivo não existe, começamos com objeto vazio
-    if (err.code === 'ENOENT') return {};
+    // 404 = arquivo não existe
+    if (err.status === 404) return { text: null, sha: null };
     throw err;
   }
 }
 
-async function writeKeysFile(obj) {
-  const json = JSON.stringify(obj, null, 2) + '\n';
-  // escrito de forma atômica
-  await fs.writeFile(TEMP_FILE, json, 'utf8');
-  await fs.rename(TEMP_FILE, KEYS_FILE);
-}
-
-// Validação simples dos dados recebidos
-function validatePayload(p) {
-  if (!p) return 'Payload vazio';
-  if (typeof p.id !== 'string' || p.id.trim() === '') return 'Campo id inválido';
-  if (typeof p.key !== 'string' || p.key.trim() === '') return 'Campo key inválido';
-  if (typeof p.generated !== 'string') return 'Campo generated deve ser string ISO';
-  if (typeof p.expiry !== 'number') return 'Campo expiry deve ser número (timestamp)';
-  return null;
-}
-
-app.post('/add-key', async (req, res) => {
+// Rota para receber e gravar key
+app.post('/api/push-key', async (req, res) => {
   try {
-    const err = validatePayload(req.body);
-    if (err) return res.status(400).json({ error: err });
+    const payload = req.body;
+    // validar payload mínimo
+    if (!payload || typeof payload.id !== 'string' || typeof payload.key !== 'string') {
+      return res.status(400).json({ error: 'payload inválido. deve conter id e key.' });
+    }
 
-    const { id, key, generated, expiry } = req.body;
+    const id = payload.id;
+    // dados opcionais:
     const entry = {
-      key,
-      generated,
-      expiry,
+      key: payload.key,
+      generated: payload.generated || new Date().toISOString(),
+      expiry: typeof payload.expiry === 'number' ? payload.expiry : (payload.expiry ? Number(payload.expiry) : null),
       used: false,
       usedAt: null
     };
 
-    const data = await readKeysFile();
+    // pega conteúdo atual
+    const { text, sha } = await getFileContent(KEYS_PATH);
 
-    // Se já existir id, sobrescreve (ou você pode recusar; modifique aqui)
-    data[id] = entry;
+    let jsonObj;
+    if (!text) {
+      // arquivo não existe -> cria novo objeto
+      jsonObj = {};
+    } else {
+      try {
+        jsonObj = JSON.parse(text);
+        if (typeof jsonObj !== 'object' || jsonObj === null) throw new Error('Formato inválido');
+      } catch (err) {
+        // Se estiver corrompido ou vazio -> log e tentar recuperar como objeto vazio
+        console.warn('keys.json existente está inválido — vamos reescrever. Erro:', err.message);
+        jsonObj = {};
+      }
+    }
 
-    await writeKeysFile(data);
+    // adiciona/atualiza entry
+    jsonObj[id] = entry;
 
-    return res.json({ ok: true, id, entry });
-  } catch (e) {
-    console.error('Erro /add-key:', e);
-    return res.status(500).json({ error: 'erro interno' });
-  }
-});
+    const newText = JSON.stringify(jsonObj, null, 2) + '\n';
+    const newBase64 = Buffer.from(newText, 'utf8').toString('base64');
 
-// Endpoint para marcar uma key como usada (ex.: quando jogador resgata)
-app.post('/use-key', async (req, res) => {
-  try {
-    const { id } = req.body;
-    if (typeof id !== 'string' || id.trim() === '') return res.status(400).json({ error: 'id inválido' });
+    // Faz PUT para criar/atualizar arquivo no repo
+    const commitMessage = `Add/Update key ${id} via API`;
+    const params = {
+      owner: REPO_OWNER,
+      repo: REPO_NAME,
+      path: KEYS_PATH,
+      message: commitMessage,
+      content: newBase64,
+      committer: {
+        name: 'CN14X-HUD API',
+        email: 'noreply@example.com'
+      }
+    };
+    if (sha) params.sha = sha; // necessário para atualização
 
-    const data = await readKeysFile();
-    if (!data[id]) return res.status(404).json({ error: 'id não encontrado' });
+    const updateResp = await octokit.repos.createOrUpdateFileContents(params);
 
-    if (data[id].used) return res.status(400).json({ error: 'já usada' });
+    return res.json({
+      ok: true,
+      commit: updateResp.data.commit.sha,
+      id,
+      entry
+    });
 
-    data[id].used = true;
-    data[id].usedAt = new Date().toISOString();
-
-    await writeKeysFile(data);
-    return res.json({ ok: true, id, entry: data[id] });
-  } catch (e) {
-    console.error('Erro /use-key:', e);
-    return res.status(500).json({ error: 'erro interno' });
-  }
-});
-
-// Opcional: pegar keys.json (leitura pública, proteja se for necessário)
-app.get('/keys.json', async (req, res) => {
-  try {
-    const raw = await fs.readFile(KEYS_FILE, 'utf8');
-    res.type('application/json').send(raw);
-  } catch (e) {
-    if (e.code === 'ENOENT') return res.status(404).send('{}');
-    console.error('Erro GET /keys.json', e);
-    res.status(500).send('{}');
+  } catch (err) {
+    console.error('Erro em /api/push-key:', err);
+    return res.status(500).json({ error: 'erro interno', details: err.message });
   }
 });
 
