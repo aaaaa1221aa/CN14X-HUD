@@ -1,0 +1,72 @@
+# .github/workflows/auto-clean-keys.yml
+name: Auto Clean Expired Keys
+
+on:
+  workflow_dispatch:  # Permite executar manualmente
+  schedule:
+    - cron: '0 */6 * * *'  # Roda a cada 6 horas
+
+jobs:
+  clean-keys:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+      
+      - name: Setup Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.10'
+      
+      - name: Clean Expired Keys
+        run: |
+          python3 << 'EOF'
+          import json
+          from datetime import datetime
+          
+          # Carregar keys
+          with open('keys.json', 'r') as f:
+              keys = json.load(f)
+          
+          original_count = len(keys)
+          
+          # Remover expiradas (24 horas)
+          now = int(datetime.now().timestamp())
+          valid_keys = [k for k in keys if k['expiry'] > now]
+          
+          removed = original_count - len(valid_keys)
+          
+          # Salvar
+          with open('keys.json', 'w') as f:
+              json.dump(valid_keys, f, indent=2)
+          
+          print(f"🗑️  Keys removidas: {removed}")
+          print(f"✅ Keys válidas: {len(valid_keys)}")
+          EOF
+      
+      - name: Commit and Push
+        run: |
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Action Bot"
+          git add keys.json
+          
+          # Verificar se há mudanças
+          if git diff --staged --quiet; then
+            echo "✅ Nenhuma key expirada para remover"
+          else
+            REMOVED=$(git diff --staged keys.json | grep "^-" | grep -c "key" || echo "0")
+            git commit -m "🗑️ Auto-clean: Remove expired keys ($(date +%Y-%m-%d))"
+            git push
+            echo "✅ $REMOVED key(s) expirada(s) removida(s)"
+          fi
+      
+      - name: Summary
+        run: |
+          echo "### 🗑️ Limpeza de Keys Concluída" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          TOTAL=$(cat keys.json | grep -c "\"key\"" || echo "0")
+          echo "- ✅ Keys válidas: $TOTAL" >> $GITHUB_STEP_SUMMARY
+          echo "- 🕐 Executado em: $(date)" >> $GITHUB_STEP_SUMMARY
